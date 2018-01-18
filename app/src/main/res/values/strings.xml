@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">BackupRestore</string>
+    <string name="backup">备份</string>
+    <string name="restore">恢复</string>
+
+    <string name="message">信息</string>
+    <string name="category_apk">应用</string>
+    <string name="category_document">文档</string>
+    <string name="category_music">音乐</string>
+    <string name="category_picture">图像</string>
+    <string name="category_video">视频</string>
+    <string name="category_zip">压缩包</string>
+    <string name="empty">暂无文件</string>
+</resources>

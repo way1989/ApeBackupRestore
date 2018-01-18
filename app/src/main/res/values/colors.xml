@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="primary">#4CAF50</color>
+    <color name="primary_dark">#388E3C</color>
+    <color name="primary_light">#C8E6C9</color>
+    <color name="accent">#4CAF50</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+    <color name="gray_dark">#ff888888</color>
+    <color name="black_light">#ff666666</color>
+    <color name="divider_bg">#ffdddddd</color>
+    <color name="yellow_warning_text">#ffcb8f00</color>
+    <color name="yellow_warning">#fffffcb8</color>
+    <color name="secondary_pressed">#66999999</color>
+    <color name="selector_hover">#33999999</color>
+    <color name="selector_hover_ripple">#11999999</color>
+    <color name="selector_hover_inv">#20cccccc</color>
+    <color name="white_pressed1">#ffdfdfdf</color>
+    <color name="font_black_content">#ff222222</color>
+
+    <color name="green">#ff31c27c</color>
+    <color name="green_end">#00f4f4f4</color>
+    <color name="green_light">#ff5ecf8f</color>
+    <color name="green_lighter">#ffe5f0ea</color>
+    <color name="green_start">#ff36c574</color>
+
+    <color name="bg">#fff4f4f4</color>
+    <color name="black">#ff000000</color>
+    <color name="black_alpha">#77000000</color>
+    <color name="black_dark">#ff818181</color>
+    <color name="blue">#ff2ea3f5</color>
+    <color name="bottom_divider_bg">#ffc0c0c0</color>
+    <color name="ccc">#cccccccc</color>
+    <color name="gray_light">#ffc6c6c6</color>
+    <color name="tab_bg">#fffafafa</color>
+    <color name="gray_lighter">#ffaaaaaa</color>
+    <color name="qr_scan_mask">#60000000</color>
+    <color name="white_dark">#ffeaeaea</color>
+</resources>

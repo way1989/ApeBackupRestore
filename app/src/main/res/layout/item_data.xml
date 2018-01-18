@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/exchange_item_margin"
+                android:gravity="center"
+                android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/rl_item"
+        android:layout_width="@dimen/exchange_item_width"
+        android:layout_height="@dimen/exchange_item_width"
+        android:layout_centerHorizontal="true"
+        android:foreground="?itemBackground">
+
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/exchange_item_icon_margin"
+            android:src="@drawable/icon_data_message_normal"/>
+
+        <ImageView
+            android:id="@+id/iv_selected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_data_select"
+            android:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/tv_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_icon"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="@dimen/exchange_item_count_margin"
+            android:text="0"
+            android:textColor="@color/gray_dark"
+            android:textSize="@dimen/textSize_h6"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rl_item"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="@dimen/exchange_item_name_margin"
+        android:gravity="center"
+        android:text="@string/message"
+        android:textColor="@color/black"
+        android:textSize="@dimen/textSize_h4"/>
+</RelativeLayout>
