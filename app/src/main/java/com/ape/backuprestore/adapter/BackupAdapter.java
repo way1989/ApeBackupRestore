@@ -12,6 +12,7 @@ import com.ape.backuprestore.PersonalItemData;
 import com.ape.backup.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by android on 16-7-16.
@@ -29,8 +30,8 @@ public class BackupAdapter extends RecyclerView.Adapter<BackupAdapter.ViewHolder
         mListener = onItemClickListener;
     }
 
-    public void setDatas(ArrayList<PersonalItemData> datas) {
-        mPersonalItemDatas = datas;
+    public void setDatas(List<PersonalItemData> datas) {
+        mPersonalItemDatas.addAll(datas);
         notifyDataSetChanged();
     }
 

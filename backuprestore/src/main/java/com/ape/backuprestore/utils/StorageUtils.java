@@ -20,7 +20,7 @@ public class StorageUtils {
         File file = new File(storagePath);
         if (file.exists() && file.isDirectory()) {
             return storagePath;
-        } else if (file.mkdir()) {
+        } else if (file.mkdirs()) {
             return storagePath;
         } else {
             return null;

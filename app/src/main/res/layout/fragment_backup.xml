@@ -6,11 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:isFirstVisible="true">
-
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_data_category"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingEnd="16dp"
         android:paddingStart="16dp"/>
+    <Button
+        android:id="@+id/btn_backup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="@string/backup" />
+    </FrameLayout>
 </com.weavey.loading.lib.LoadingLayout>
