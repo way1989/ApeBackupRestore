@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.os.Build;
 import android.util.Log;
 
@@ -42,6 +43,7 @@ public class Utils {
     public static boolean isBackingUp;
     private static String[] sRequestedPermissions = null;
     private static boolean sRequestedPermissionsCached = false;
+    private static Signature[] sSystemSignature;
 
     public static int getWorkingInfo() {
         int stringId = -1;
@@ -270,5 +272,40 @@ public class Utils {
             }
             return result;
         }
+    }
+
+    public static boolean isSystemPackage(PackageManager pm, PackageInfo pkg) {
+        if (sSystemSignature == null) {
+            sSystemSignature = new Signature[]{getSystemSignature(pm)};
+        }
+        return sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg));
+    }
+
+    private static Signature getFirstSignature(PackageInfo pkg) {
+        if (pkg != null && pkg.signatures != null && pkg.signatures.length > 0) {
+            return pkg.signatures[0];
+        }
+        return null;
+    }
+
+    private static Signature getSystemSignature(PackageManager pm) {
+        try {
+            final PackageInfo sys = pm.getPackageInfo("android", PackageManager.GET_SIGNATURES);
+            return getFirstSignature(sys);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return null;
+    }
+
+    public static boolean isPlatformSigned(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNATURES);
+            return isSystemPackage(packageManager, packageInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

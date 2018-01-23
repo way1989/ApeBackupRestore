@@ -28,7 +28,7 @@ public class AppBackupComposer extends Composer {
 
     private List<ApplicationInfo> mUserAppInfoList = null;
     private int mAppIndex = 0;
-    private BackupZip mZipFileHandler;
+    //private BackupZip mZipFileHandler;
 
     public AppBackupComposer(Context context) {
         super(context);
@@ -130,17 +130,17 @@ public class AppBackupComposer extends Composer {
                     + ", sourceDir:" + appInfo.sourceDir + ", dataDir:" + appInfo.dataDir
                     + ", label:" + label);
             try {
-                //copyFile(appSrc, appDest);
-                mZipFileHandler.addFileByFileName(appSrc, label + Constants.ModulePath.FILE_EXT_APP);
+                copyFile(appSrc, appDest);
+                //mZipFileHandler.addFileByFileName(appSrc, label + Constants.ModulePath.FILE_EXT_APP);
                 Logger.d(TAG, "addFile " + appSrc + "success");
                 result = true;
             } catch (IOException e) {
-                try {
-                    Logger.e(TAG, "[implementComposeOneEntity] finish");
-                    mZipFileHandler.finish();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
+//                try {
+//                    Logger.e(TAG, "[implementComposeOneEntity] finish");
+//                    mZipFileHandler.finish();
+//                } catch (IOException e1) {
+//                    e1.printStackTrace();
+//                }
                 if (super.mReporter != null) {
                     super.mReporter.onErr(e);
                 }
@@ -176,18 +176,18 @@ public class AppBackupComposer extends Composer {
         if (mUserAppInfoList != null) {
             mUserAppInfoList.clear();
         }
-        if (mZipFileHandler != null) {
-            try {
-                mZipFileHandler.finish();
-            } catch (IOException e) {
-                e.printStackTrace();
-                if (super.mReporter != null) {
-                    super.mReporter.onErr(e);
-                }
-            } finally {
-                mZipFileHandler = null;
-            }
-        }
+//        if (mZipFileHandler != null) {
+//            try {
+//                mZipFileHandler.finish();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                if (super.mReporter != null) {
+//                    super.mReporter.onErr(e);
+//                }
+//            } finally {
+//                mZipFileHandler = null;
+//            }
+//        }
         Logger.d(TAG, "onEnd()");
     }
 
@@ -230,14 +230,14 @@ public class AppBackupComposer extends Composer {
             if (!path.exists()) {
                 path.mkdirs();
             }
-            try {
-                mZipFileHandler = new BackupZip(path + File.separator + Constants.ModulePath.NAME_APPZIP);
-            } catch (IOException e) {
-                if (super.mReporter != null) {
-                    super.mReporter.onErr(e);
-                }
-                e.printStackTrace();
-            }
+//            try {
+//                mZipFileHandler = new BackupZip(path + File.separator + Constants.ModulePath.NAME_APPZIP);
+//            } catch (IOException e) {
+//                if (super.mReporter != null) {
+//                    super.mReporter.onErr(e);
+//                }
+//                e.printStackTrace();
+//            }
         }
     }
 }

@@ -6,11 +6,13 @@ import com.ape.backuprestore.utils.BackupZip;
 import com.ape.backuprestore.utils.Constants;
 import com.ape.backuprestore.utils.Logger;
 import com.ape.backuprestore.utils.ModuleType;
+import com.ape.backuprestore.utils.Utils;
 import com.ape.packagemanager.PackageManagerUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,8 +23,9 @@ public class AppRestoreComposer extends Composer {
     private final Object mLock = new Object();
     private int mIndex;
     private List<String> mFileNameList;
-    private String mZipFileName;
-    private String mDestPath;
+    private boolean isPlatformSigned;
+    //private String mZipFileName;
+    //private String mDestPath;
 
     /**
      * @param context context
@@ -63,10 +66,11 @@ public class AppRestoreComposer extends Composer {
         if (parentPath == null) {
             Logger.d(TAG, "init() parentPath == null result:" + result);
             return result;
-        } else {
-            mDestPath = parentPath + File.separator + RESTORE
-                    + File.separator + Constants.ModulePath.FOLDER_APP;
         }
+//        else {
+//            mDestPath = parentPath + File.separator + RESTORE
+//                    + File.separator + Constants.ModulePath.FOLDER_APP;
+//        }
 
 
         mFileNameList = new ArrayList<>();
@@ -74,21 +78,22 @@ public class AppRestoreComposer extends Composer {
         String sourcePath = mParentFolderPath + File.separator + Constants.ModulePath.FOLDER_APP;
         File folder = new File(sourcePath);
         if (folder.exists() && folder.isDirectory()) {
-            try {
-                mZipFileName = sourcePath + File.separator + Constants.ModulePath.NAME_APPZIP;
-                File file = new File(mZipFileName);
-                if (file.exists()) {
-                    mFileNameList = BackupZip.getFileList(mZipFileName, false, true, ".apk");
-                    result = true;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                if (super.mReporter != null) {
-                    super.mReporter.onErr(e);
-                }
-            }
+            mFileNameList = Arrays.asList(folder.list());
+//            try {
+//                mZipFileName = sourcePath + File.separator + Constants.ModulePath.NAME_APPZIP;
+//                File file = new File(mZipFileName);
+//                if (file.exists()) {
+//                    mFileNameList = BackupZip.getFileList(mZipFileName, false, true, ".apk");
+//                    result = true;
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                if (super.mReporter != null) {
+//                    super.mReporter.onErr(e);
+//                }
+//            }
         }
-
+        isPlatformSigned = Utils.isPlatformSigned(mContext, mContext.getPackageName());
         Logger.d(TAG, "init():" + result + ", count:" + getCount());
         return result;
     }
@@ -99,9 +104,9 @@ public class AppRestoreComposer extends Composer {
     @Override
     public boolean isAfterLast() {
         boolean result = true;
-        if (mDestPath == null) {
-            return result;
-        }
+//        if (mDestPath == null) {
+//            return result;
+//        }
         if (mFileNameList != null) {
             result = (mIndex >= mFileNameList.size());
         }
@@ -119,11 +124,11 @@ public class AppRestoreComposer extends Composer {
 
         if (mFileNameList != null && mIndex < mFileNameList.size()) {
             String apkName = mFileNameList.get(mIndex++);
-            String destFileName = mDestPath + File.separator + apkName;
+            //String destFileName = mDestPath + File.separator + apkName;
             try {
-                BackupZip.unZipFile(mZipFileName, apkName, destFileName);
+                //BackupZip.unZipFile(mZipFileName, apkName, destFileName);
                 //String apkFileName = mFileNameList.get(mIndex++);
-                File apkFile = new File(destFileName);
+                File apkFile = new File(apkName);
                 if (apkFile.exists()) {
                     result = installApk(apkFile);
                 } else {
@@ -139,25 +144,27 @@ public class AppRestoreComposer extends Composer {
 
     private boolean installApk(File apkFile) {
         boolean result = false;
-        PackageManagerUtil packageManagerUtil = new PackageManagerUtil(mContext, mLock);
+        if (isPlatformSigned) {
+            PackageManagerUtil packageManagerUtil = new PackageManagerUtil(mContext, mLock);
 
-        packageManagerUtil.installPackage(apkFile);
+            packageManagerUtil.installPackage(apkFile);
 
-        synchronized (mLock) {
-            while (!packageManagerUtil.isFinished()) {
-                try {
-                    mLock.wait();
-                } catch (InterruptedException e) {
-                    Logger.d(TAG, "InterruptedException");
+            synchronized (mLock) {
+                while (!packageManagerUtil.isFinished()) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException e) {
+                        Logger.d(TAG, "InterruptedException");
+                    }
                 }
-            }
 
-            if (packageManagerUtil.isSuccess()) {
-                apkFile.delete();
-                result = true;
-                Logger.d(TAG, "install success");
-            } else {
-                Logger.d(TAG, "install fail");
+                if (packageManagerUtil.isSuccess()) {
+                    apkFile.delete();
+                    result = true;
+                    Logger.d(TAG, "install success");
+                } else {
+                    Logger.d(TAG, "install fail");
+                }
             }
         }
         return result;
@@ -169,13 +176,13 @@ public class AppRestoreComposer extends Composer {
     @Override
     public void onStart() {
         super.onStart();
-        if (mDestPath != null) {
-            File tmpFolder = new File(mDestPath);
-
-            if (!tmpFolder.exists()) {
-                tmpFolder.mkdirs();
-            }
-        }
+//        if (mDestPath != null) {
+//            File tmpFolder = new File(mDestPath);
+//
+//            if (!tmpFolder.exists()) {
+//                tmpFolder.mkdirs();
+//            }
+//        }
     }
 
     /**

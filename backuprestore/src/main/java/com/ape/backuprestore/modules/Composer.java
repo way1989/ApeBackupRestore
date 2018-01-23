@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class Composer {
     private static final String TAG = "Composer";
-    protected static final String RESTORE = "Restore";
+    protected static final String RESTORE = "Backup";
 
     protected Context mContext;
     protected ProgressReporter mReporter;
