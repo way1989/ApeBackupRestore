@@ -1,7 +1,9 @@
 package com.ape.backuprestore.utils;
 
 
+import android.content.Context;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -12,6 +14,18 @@ public class StorageUtils {
 
     public final static int MINIMUM_SIZE = 512;
     private static final String CLASS_TAG = "StorageUtils";
+
+    public static String getSavePath(Context context) {
+        final String[] paths = StorageDirManager.getInstance(context).getStoragePath();
+        for (int i = paths.length - 1; i >= 0; i--) {
+            final String path = paths[i];
+            if (!TextUtils.isEmpty(path)) {
+                Log.d(CLASS_TAG, "getSavePath: path = " + path);
+                return path;
+            }
+        }
+        return null;
+    }
 
     public static String getBackupPath() {
         String storagePath = Environment.getExternalStorageDirectory().getAbsolutePath()
