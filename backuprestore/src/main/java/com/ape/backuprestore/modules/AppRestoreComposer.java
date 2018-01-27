@@ -2,7 +2,6 @@ package com.ape.backuprestore.modules;
 
 import android.content.Context;
 
-import com.ape.backuprestore.utils.BackupZip;
 import com.ape.backuprestore.utils.Constants;
 import com.ape.backuprestore.utils.Logger;
 import com.ape.backuprestore.utils.ModuleType;
@@ -10,7 +9,6 @@ import com.ape.backuprestore.utils.Utils;
 import com.ape.packagemanager.PackageManagerUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

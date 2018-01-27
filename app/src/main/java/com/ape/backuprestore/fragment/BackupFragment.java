@@ -6,19 +6,9 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.ape.backup.R;
@@ -28,7 +18,6 @@ import com.ape.backuprestore.PersonalItemData;
 import com.ape.backuprestore.RecordXmlComposer;
 import com.ape.backuprestore.RecordXmlInfo;
 import com.ape.backuprestore.ResultDialog;
-import com.ape.backuprestore.adapter.BackupAdapter;
 import com.ape.backuprestore.modules.Composer;
 import com.ape.backuprestore.util.BackupUtil;
 import com.ape.backuprestore.util.RxSchedulers;
@@ -36,20 +25,13 @@ import com.ape.backuprestore.utils.Constants;
 import com.ape.backuprestore.utils.ModuleType;
 import com.ape.backuprestore.utils.StorageUtils;
 import com.ape.backuprestore.utils.Utils;
-import com.weavey.loading.lib.LoadingLayout;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableObserver;
 
 import static com.ape.backuprestore.utils.FileUtils.deleteFileOrFolder;
@@ -58,19 +40,10 @@ import static com.ape.backuprestore.utils.FileUtils.deleteFileOrFolder;
  * Created by way on 2018/1/18.
  */
 
-public class BackupFragment extends Fragment implements BackupAdapter.OnItemClickListener, BackupService.OnBackupStatusListener {
+public class BackupFragment extends BaseFragment implements BackupService.OnBackupStatusListener {
     private static final String TAG = "BackupFragment";
     protected BackupService.BackupBinder mBackupService;
-    protected ProgressDialog mProgressDialog;
-    @BindView(R.id.rv_data_category)
-    RecyclerView mRvDataCategory;
-    @BindView(R.id.loading_layout)
-    LoadingLayout mLoadingLayout;
-    @BindView(R.id.btn_backup)
-    Button mBtnBackup;
-    private BackupAdapter mAdapter;
-    @NonNull
-    private CompositeDisposable mCompositeDisposable;
+
     private ServiceConnection mServiceCon = new ServiceConnection() {
         @Override
         public void onServiceConnected(final ComponentName name, final IBinder service) {
@@ -99,73 +72,49 @@ public class BackupFragment extends Fragment implements BackupAdapter.OnItemClic
         return fragment;
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_backup, container, false);
-        ButterKnife.bind(this, view);
-        return view;
+    protected void start() {
+        startBackup();
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        bindBackupService();
-        mAdapter = new BackupAdapter(getContext(), this);
-        mRvDataCategory.setLayoutManager(new GridLayoutManager(getContext(), 3));
-        mRvDataCategory.setAdapter(mAdapter);
-        mCompositeDisposable = new CompositeDisposable();
+    protected void bindService() {
+        getContext().bindService(new Intent(getContext(), BackupService.class), mServiceCon, Service.BIND_AUTO_CREATE);
+    }
 
-        mCompositeDisposable.clear();
-        DisposableObserver<List<PersonalItemData>> observer = new DisposableObserver<List<PersonalItemData>>() {
+    @Override
+    protected void unBindService() {
+        if (mBackupService != null) {
+            mBackupService.setOnBackupChangedListner(null);
+        }
+        try {
+            getContext().unbindService(mServiceCon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            @Override
-            public void onNext(List<PersonalItemData> itemDataList) {
-                Log.d(TAG, "onNext: itemDataList = " + itemDataList.size());
-                mAdapter.setDatas(itemDataList);
-                mLoadingLayout.setStatus(LoadingLayout.Success);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: e = " + e);
-                mLoadingLayout.setStatus(LoadingLayout.Error);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
+    @Override
+    protected void getData(DisposableObserver<List<PersonalItemData>> observer) {
         BackupUtil.getPersonalItemDatas(getContext())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        mLoadingLayout.setStatus(LoadingLayout.Loading);
-                    }
-                })
                 .compose(RxSchedulers.<List<PersonalItemData>>io_main()).subscribe(observer);
-        mCompositeDisposable.add(observer);
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unBindBackupService();
-        mCompositeDisposable.clear();
+    public int getLayoutId() {
+        return R.layout.fragment_backup_restore;
     }
 
     @Override
-    public void onItemClick(View v) {
-        mBtnBackup.setEnabled(!getSelectedItemList().isEmpty());
+    protected int getButtonStrRes() {
+        return R.string.backup;
     }
 
     private void startBackup() {
         //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         //String folderName = dateFormat.format(new Date(System.currentTimeMillis()));
 
-        String path = StorageUtils.getBackupPath();
+        String path = StorageUtils.getInstance(getContext()).getBackupPath();
         if (path == null) {
             Toast.makeText(getContext(), "can not get the storage...", Toast.LENGTH_SHORT).show();
             return;
@@ -217,7 +166,7 @@ public class BackupFragment extends Fragment implements BackupAdapter.OnItemClic
             }
             boolean result = mBackupService.startBackup(mBackupFolderPath);
             if (!result) {
-                String path = StorageUtils.getBackupPath();
+                String path = StorageUtils.getInstance(getContext()).getBackupPath();
                 if (path == null) {
                     // no sdcard
                     Log.d(TAG, "SDCard is removed");
@@ -235,18 +184,6 @@ public class BackupFragment extends Fragment implements BackupAdapter.OnItemClic
         }
     }
 
-    private ArrayList<Integer> getSelectedItemList() {
-        ArrayList<Integer> list = new ArrayList<>();
-        int count = mAdapter.getItemCount();
-        for (int position = 0; position < count; position++) {
-            PersonalItemData item = mAdapter.getItemByPosition(position);
-            if (item.isSelected()) {
-                list.add(item.getType());
-            }
-        }
-        return list;
-    }
-
     private ProgressDialog createProgressDlg() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(getActivity());
@@ -256,18 +193,6 @@ public class BackupFragment extends Fragment implements BackupAdapter.OnItemClic
             mProgressDialog.setCanceledOnTouchOutside(false);
         }
         return mProgressDialog;
-    }
-
-    private void bindBackupService() {
-        getContext().bindService(new Intent(getContext(), BackupService.class), mServiceCon, Service.BIND_AUTO_CREATE);
-    }
-
-    private void unBindBackupService() {
-        try {
-            getContext().unbindService(mServiceCon);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     protected void startService() {
@@ -358,8 +283,4 @@ public class BackupFragment extends Fragment implements BackupAdapter.OnItemClic
         }
     }
 
-    @OnClick(R.id.btn_backup)
-    public void onViewClicked() {
-        startBackup();
-    }
 }

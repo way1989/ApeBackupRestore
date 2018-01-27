@@ -32,8 +32,8 @@ public class BackupUtil {
     private static final int TYPES[] = new int[]{
             ModuleType.TYPE_CONTACT,
             ModuleType.TYPE_MESSAGE,
-            ModuleType.TYPE_CALL_LOG,
-            ModuleType.TYPE_CALENDAR,
+            //ModuleType.TYPE_CALL_LOG,
+            //ModuleType.TYPE_CALENDAR,
             ModuleType.TYPE_PICTURE,
             ModuleType.TYPE_MUSIC,
             ModuleType.TYPE_APP

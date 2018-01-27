@@ -302,7 +302,7 @@ public class RestoreEngine {
                                 continue;
                             }
                             Logger.d(TAG, "RestoreThread composer: " + composer.getModuleType()
-                                            + " init finish");
+                                    + " init finish");
                             composer.onStart();
                             while (!composer.isAfterLast() &&
                                     !composer.isCancel() &&
@@ -322,7 +322,7 @@ public class RestoreEngine {
 
                                 composer.composeOneEntity();
                                 Logger.d(TAG, "RestoreThread composer: " + composer.getModuleType()
-                                                + " compose one entiry");
+                                        + " compose one entiry");
                             }
                         }
 

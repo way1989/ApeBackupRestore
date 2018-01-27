@@ -87,8 +87,8 @@ public class BackupFilePreview {
         return INSTANCE;
     }
 
-    public boolean init() {
-        String path = StorageUtils.getBackupPath();
+    public boolean init(Context context) {
+        String path = StorageUtils.getInstance(context).getBackupPath();
         if (TextUtils.isEmpty(path))
             return false;
 

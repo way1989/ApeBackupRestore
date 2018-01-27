@@ -21,12 +21,12 @@ public class RestoreUtil {
     private static final String TAG = "RestoreUtil";
     private static final int TYPES[] = new int[]{
             ModuleType.TYPE_APP,
-            ModuleType.TYPE_CALENDAR,
+            //ModuleType.TYPE_CALENDAR,
             ModuleType.TYPE_CONTACT,
             ModuleType.TYPE_MESSAGE,
             ModuleType.TYPE_MUSIC,
             ModuleType.TYPE_PICTURE,
-            ModuleType.TYPE_CALL_LOG,
+            //ModuleType.TYPE_CALL_LOG,
     };
 
 
@@ -45,7 +45,7 @@ public class RestoreUtil {
     private static ArrayList<PersonalItemData> getData(Context context) {
         ArrayList<PersonalItemData> personalItemDatas = new ArrayList<>();
         BackupFilePreview preview = BackupFilePreview.getInstance();
-        if (preview.init()) {
+        if (preview.init(context)) {
             int modules = preview.getBackupModules(context.getApplicationContext());
             for (int type : TYPES) {
                 if ((modules & type) != 0) {

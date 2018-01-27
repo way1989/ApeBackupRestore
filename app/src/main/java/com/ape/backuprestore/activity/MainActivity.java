@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.ape.backup.R;
 import com.ape.backuprestore.fragment.BackupFragment;
 import com.ape.backuprestore.fragment.RestoreFragment;
+import com.ape.backuprestore.utils.StorageUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.READ_SMS,
                 Manifest.permission.READ_CONTACTS,
                 Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.READ_CALL_LOG,
+                Manifest.permission.WRITE_CALL_LOG,
                 Manifest.permission.READ_PHONE_STATE)
                 .subscribe(new Consumer<Boolean>() {
                     @Override
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                         if (granted) {
                             setupToolbar();
                             setupViewpager();
+                            StorageUtils.getInstance(getApplicationContext()).getStoragePath();
                         } else {
                             Toast.makeText(getApplicationContext(), "需要权限才能正常运行", Toast.LENGTH_SHORT).show();
                             finish();

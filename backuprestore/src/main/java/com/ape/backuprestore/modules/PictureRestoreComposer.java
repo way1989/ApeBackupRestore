@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Created by android on 16-7-16.
  */
 public class PictureRestoreComposer extends Composer {
-    private static final String TAG ="PictureRestoreComposer";
+    private static final String TAG = "PictureRestoreComposer";
     private static final String[] PROJECTION = new String[]{
             MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA};
     private int mIndex;

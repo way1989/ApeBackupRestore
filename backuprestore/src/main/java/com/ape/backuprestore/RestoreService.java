@@ -81,8 +81,6 @@ public class RestoreService extends Service implements ProgressReporter, Restore
     public boolean onUnbind(Intent intent) {
         super.onUnbind(intent);
         Logger.i(CLASS_TAG, "onUnbind");
-        // If SD card removed or full, kill process
-        StorageUtils.killProcessIfNecessary();
         return true;
     }
 
@@ -212,7 +210,7 @@ public class RestoreService extends Service implements ProgressReporter, Restore
      */
     public void onFinishRestore(boolean bSuccess) {
         moveToState(Constants.State.FINISH);
-        if (StorageUtils.getBackupPath() == null) {
+        if (StorageUtils.getInstance(getApplicationContext()).getBackupPath() == null) {
             moveToState(Constants.State.INIT);
         }
         if (mRestoreStatusListener != null) {

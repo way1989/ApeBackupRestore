@@ -13,10 +13,9 @@ import android.widget.Toast;
 
 import com.ape.backuprestore.modules.Composer;
 import com.ape.backuprestore.utils.Constants;
-import com.ape.backuprestore.utils.ModuleType;
 import com.ape.backuprestore.utils.Logger;
+import com.ape.backuprestore.utils.ModuleType;
 import com.ape.backuprestore.utils.NotifyManager;
-import com.ape.backuprestore.utils.StorageUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,8 +52,6 @@ public class BackupService extends Service implements ProgressReporter, BackupEn
     public boolean onUnbind(Intent intent) {
         super.onUnbind(intent);
         Logger.i(TAG, "onUnbind");
-        // If SD card removed or full, kill process
-        StorageUtils.killProcessIfNecessary();
         return true;
     }
 

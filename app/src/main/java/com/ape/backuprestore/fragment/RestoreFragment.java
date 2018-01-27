@@ -8,18 +8,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.ape.backup.R;
@@ -29,7 +19,6 @@ import com.ape.backuprestore.RecordXmlInfo;
 import com.ape.backuprestore.RecordXmlParser;
 import com.ape.backuprestore.RestoreService;
 import com.ape.backuprestore.ResultDialog;
-import com.ape.backuprestore.adapter.BackupAdapter;
 import com.ape.backuprestore.modules.Composer;
 import com.ape.backuprestore.util.RestoreUtil;
 import com.ape.backuprestore.util.RxSchedulers;
@@ -39,36 +28,23 @@ import com.ape.backuprestore.utils.Logger;
 import com.ape.backuprestore.utils.ModuleType;
 import com.ape.backuprestore.utils.StorageUtils;
 import com.ape.backuprestore.utils.Utils;
-import com.weavey.loading.lib.LoadingLayout;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by way on 2018/1/18.
  */
 
-public class RestoreFragment extends Fragment implements BackupAdapter.OnItemClickListener, RestoreService.OnRestoreStatusListener {
+public class RestoreFragment extends BaseFragment implements RestoreService.OnRestoreStatusListener {
     private static final String TAG = "RestoreFragment";
     protected RestoreService.RestoreBinder mRestoreService;
-    protected ProgressDialog mProgressDialog;
-    @BindView(R.id.rv_data_category)
-    RecyclerView mRvDataCategory;
-    @BindView(R.id.loading_layout)
-    LoadingLayout mLoadingLayout;
-    @BindView(R.id.btn_backup)
-    Button mBtnBackup;
+
     ServiceConnection mServiceCon = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -88,9 +64,7 @@ public class RestoreFragment extends Fragment implements BackupAdapter.OnItemCli
             mRestoreService = null;
         }
     };
-    private BackupAdapter mAdapter;
-    @NonNull
-    private CompositeDisposable mCompositeDisposable;
+
     private String mRestoreFolderPath;
 
     public RestoreFragment() {
@@ -102,99 +76,18 @@ public class RestoreFragment extends Fragment implements BackupAdapter.OnItemCli
         return fragment;
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_backup, container, false);
-        ButterKnife.bind(this, view);
-        return view;
+    protected void start() {
+        startRestore();
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        bindRestoreService();
-        mAdapter = new BackupAdapter(getContext(), this);
-        mRvDataCategory.setLayoutManager(new GridLayoutManager(getContext(), 3));
-        mRvDataCategory.setAdapter(mAdapter);
-        mCompositeDisposable = new CompositeDisposable();
-
-        mCompositeDisposable.clear();
-        DisposableObserver<List<PersonalItemData>> observer = new DisposableObserver<List<PersonalItemData>>() {
-
-            @Override
-            public void onNext(List<PersonalItemData> itemDataList) {
-                Log.d(TAG, "onNext: itemDataList = " + itemDataList.size());
-                if (itemDataList.isEmpty()) {
-                    mLoadingLayout.setStatus(LoadingLayout.Empty);
-                } else {
-                    mAdapter.setDatas(itemDataList);
-                    mLoadingLayout.setStatus(LoadingLayout.Success);
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: e = " + e);
-                mLoadingLayout.setStatus(LoadingLayout.Error);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-        RestoreUtil.getPersonalItemDatas(getContext())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        mLoadingLayout.setStatus(LoadingLayout.Loading);
-                    }
-                })
-                .compose(RxSchedulers.<List<PersonalItemData>>io_main()).subscribe(observer);
-        mCompositeDisposable.add(observer);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unBindRestoreService();
-        mCompositeDisposable.clear();
-    }
-
-    public void startRestore(ArrayList<Integer> restoreModeLists) {
-        if (!isCanStartRestore()) {
-            return;
-        }
-        startService();
-        Logger.d(TAG, "startRestore");
-        if (restoreModeLists.size() == 0) {
-            Toast.makeText(getContext(), getString(R.string.no_item_selected), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        mRestoreService.setRestoreModelList(restoreModeLists);
-        boolean ret = mRestoreService.startRestore(mRestoreFolderPath);
-        if (ret) {
-            String path = StorageUtils.getBackupPath();
-            if (path == null) {
-                // no sdcard
-                Logger.d(TAG, "SDCard is removed");
-                return;
-            }
-            int count = BackupFilePreview.getInstance().getItemCount(restoreModeLists.get(0));
-            int type = restoreModeLists.get(0);
-            showProgressDialog(count, type);
-        } else {
-            stopService();
-        }
-    }
-
-    private void bindRestoreService() {
+    protected void bindService() {
         getContext().bindService(new Intent(getContext(), RestoreService.class), mServiceCon, Service.BIND_AUTO_CREATE);
     }
 
-    private void unBindRestoreService() {
+    @Override
+    protected void unBindService() {
         if (mRestoreService != null) {
             mRestoreService.setOnRestoreChangedListner(null);
         }
@@ -202,6 +95,52 @@ public class RestoreFragment extends Fragment implements BackupAdapter.OnItemCli
             getContext().unbindService(mServiceCon);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void getData(DisposableObserver<List<PersonalItemData>> observer) {
+        RestoreUtil.getPersonalItemDatas(getContext())
+                .compose(RxSchedulers.<List<PersonalItemData>>io_main()).subscribe(observer);
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.fragment_backup_restore;
+    }
+
+    @Override
+    protected int getButtonStrRes() {
+        return R.string.restore;
+    }
+
+
+    public void startRestore() {
+        String path = StorageUtils.getInstance(getContext()).getBackupPath();
+        if (path == null) {
+            Toast.makeText(getContext(), "can not get the storage...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mRestoreFolderPath = path;
+        if (!isCanStartRestore()) {
+            return;
+        }
+        final ArrayList<Integer> selectedItemList = getSelectedItemList();
+        if (selectedItemList.isEmpty()) {
+            Toast.makeText(getContext(), "Please select on or more items", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        startService();
+        Logger.d(TAG, "startRestore");
+
+        mRestoreService.setRestoreModelList(selectedItemList);
+        boolean ret = mRestoreService.startRestore(mRestoreFolderPath);
+        if (ret) {
+            int count = BackupFilePreview.getInstance().getItemCount(selectedItemList.get(0));
+            int type = selectedItemList.get(0);
+            showProgressDialog(count, type);
+        } else {
+            stopService();
         }
     }
 
@@ -368,8 +307,8 @@ public class RestoreFragment extends Fragment implements BackupAdapter.OnItemCli
     protected boolean errChecked() {
         boolean ret = false;
 
-        boolean isStorageMissing = StorageUtils.isStorageMissing();
-        String path = StorageUtils.getBackupPath();
+        boolean isStorageMissing = StorageUtils.getInstance(getContext()).isStorageMissing();
+        String path = StorageUtils.getInstance(getContext()).getBackupPath();
 
         if (isStorageMissing) {
             Logger.i(TAG, "SDCard is removed");
@@ -384,25 +323,4 @@ public class RestoreFragment extends Fragment implements BackupAdapter.OnItemCli
         return ret;
     }
 
-    private ArrayList<Integer> getSelectedItemList() {
-        ArrayList<Integer> list = new ArrayList<>();
-        int count = mAdapter.getItemCount();
-        for (int position = 0; position < count; position++) {
-            PersonalItemData item = mAdapter.getItemByPosition(position);
-            if (item.isSelected()) {
-                list.add(item.getType());
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public void onItemClick(View v) {
-        mBtnBackup.setEnabled(!getSelectedItemList().isEmpty());
-    }
-
-    @OnClick(R.id.btn_backup)
-    public void onViewClicked() {
-        startRestore(getSelectedItemList());
-    }
 }
